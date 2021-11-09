@@ -3,7 +3,7 @@ on:
   workflow_dispatch
 
 env:
-  COMPUTE_CLUSTER: batch-cluster # amlcompute cluster used by train and batch endpoint
+  COMPUTE_CLUSTER: profile-compute # amlcompute compute used by profiling
 
 jobs:  
   setup:
@@ -19,8 +19,7 @@ jobs:
           az config set defaults.group=${{secrets.RESOURCE_GROUP}}          
           az account set -s ${{secrets.SUBSCRIPTION_ID}}  
     - name: Install azureml cli extension
-      run: az extension add --source https://azuremlsdktestpypi.blob.core.windows.net/wheels/sdk-cli-v2/ml-0.0.23_october_cand-py3-none-any.whl --yes
-      #run: az extension add -n ml -y
+      run: az extension add -n ml -y
     #- name: Create azureml workspace if it does not exist
     #  run: az ml workspace create -n ${{secrets.AML_WORKSPACE}} --location ${{secrets.LOCATION}}
     #  continue-on-error: true
@@ -29,5 +28,5 @@ jobs:
     #  run: az monitor log-analytics workspace create --workspace-name ${{secrets.LA_WORKSPACE}} --location ${{secrets.LA_LOCATION}} --retention-time 730  --sku pergb2018 
     - name: Checkout
       uses: actions/checkout@v2.3.3
-    - name: Create compute cluster
-      run: az ml compute create -n ${{ env.COMPUTE_CLUSTER }} --type amlcompute --min-instances 0 --max-instances 5
+    # - name: Create compute cluster
+    #   run: az ml compute create -n ${{ env.COMPUTE_CLUSTER }} --type amlcompute --min-instances 0 --max-instances 5

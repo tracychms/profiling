@@ -63,7 +63,7 @@ Now you can start modifying the code in the <a href="/code">`code` folder</a>, s
 
 ### 6. Kickoff auto profile with multiple SKUs
 
-Run the `deploy` GitHub action. It will kick off the model deployment. After it's completed, `auto-profile` action will automatically started.
+Run the `deploy` GitHub action. It will kick off the model deployment. After it's completed, `profile` action will automatically started.
 
 # Documentation
 
