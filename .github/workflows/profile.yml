@@ -1,10 +1,26 @@
-name: profile
-on: 
+name: profiling-online-endpoints
+on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["deploy"]
-    types: [completed]
-
-env:
-
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: check out repo
+      uses: actions/checkout@v2
+    - name: azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+    - name: install dependencies
+      run: |
+          az extension add -n ml -y
+          apt-get update -y && apt-get install jq
+    - name: setup
+      run: |
+          az config set defaults.workspace=${{secrets.AML_WORKSPACE}}
+          az config set defaults.group=${{secrets.RESOURCE_GROUP}}          
+          az account set -s ${{secrets.SUBSCRIPTION_ID}}
+    - name: run job
+      run: bash -x profiling/how-to-profile-online-endpoint.sh
+      working-directory: code
+    

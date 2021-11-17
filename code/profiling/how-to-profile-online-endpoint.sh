@@ -32,8 +32,8 @@ export PROFILER_COMPUTE_SIZE=Standard_F4s_v2 # the compute size for hosting the 
 
 # <create_endpoint>
 echo "Creating Endpoint $ENDPOINT_NAME ..."
-az ml online-endpoint create --name $ENDPOINT_NAME -f endpoints/online/managed/sample/endpoint.yml
-az ml online-deployment create --name $DEPLOYMENT_NAME --endpoint $ENDPOINT_NAME -f endpoints/online/managed/sample/blue-deployment.yml --all-traffic
+az ml online-endpoint create --name $ENDPOINT_NAME -f online-endpoint/endpoint.yml
+az ml online-deployment create --name $DEPLOYMENT_NAME --endpoint $ENDPOINT_NAME -f online-endpoint/blue-deployment.yml --all-traffic
 # </create_endpoint>
 
 # <check_endpoint_Status>
@@ -102,7 +102,7 @@ sed \
   -e "s/<% TIMEOUT %>/$TIMEOUT/g" \
   -e "s/<% THREAD %>/$THREAD/g" \
   -e "s/<% COMPUTE_NAME %>/$PROFILER_COMPUTE_NAME/g" \
-  endpoints/online/profiling/profiling_job_tmpl.yml > profiling_job.yml
+  profiling/profiling_job_tmpl.yml > profiling_job.yml
 # </create_profiling_job_yaml_file>
 
 # <create_profiling_job>
