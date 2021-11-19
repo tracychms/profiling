@@ -33,9 +33,9 @@ export PROFILER_COMPUTE_SIZE=Standard_F4s_v2 # the compute size for hosting the 
 
 # <create_endpoint>
 echo "Creating Endpoint $ENDPOINT_NAME of size $DEPLOYMENT_COMPUTER_SIZE..."
-sed -e "s/<% COMPUTER_SIZE %>/$DEPLOYMENT_COMPUTER_SIZE/g" online-endpoint/blue-deployment-tmpl.yml > online-endpoint/blue-deployment.yml
+sed -e "s/<% COMPUTER_SIZE %>/$DEPLOYMENT_COMPUTER_SIZE/g" online-endpoint/blue-deployment-tmpl.yml > online-endpoint/${DEPLOYMENT_NAME}.yml
 az ml online-endpoint create --name $ENDPOINT_NAME -f online-endpoint/endpoint.yml
-az ml online-deployment create --name $DEPLOYMENT_NAME --endpoint $ENDPOINT_NAME -f online-endpoint/blue-deployment.yml --all-traffic
+az ml online-deployment create --name $DEPLOYMENT_NAME --endpoint $ENDPOINT_NAME -f online-endpoint/${DEPLOYMENT_NAME}.yml --all-traffic
 # </create_endpoint>
 
 # <check_endpoint_Status>
@@ -88,7 +88,7 @@ default_datastore_info=`az ml datastore show --name workspaceblobstore -o json`
 account_name=`echo $default_datastore_info | jq '.account_name' | sed "s/\"//g"`
 container_name=`echo $default_datastore_info | jq '.container_name' | sed "s/\"//g"`
 connection_string=`az storage account show-connection-string --name $account_name -o tsv`
-az storage blob upload --container-name $container_name/profiling_payloads --name payload.txt --file endpoints/online/profiling/payload.txt --connection-string $connection_string
+az storage blob upload --container-name $container_name/profiling_payloads --name ${ENDPOINT_NAME}_payload.txt --file profiling/payload.txt --connection-string $connection_string
 # </upload_payload_file+_to_default_blob_datastore>
 
 # <create_profiling_job_yaml_file>
@@ -104,11 +104,11 @@ sed \
   -e "s/<% TIMEOUT %>/$TIMEOUT/g" \
   -e "s/<% THREAD %>/$THREAD/g" \
   -e "s/<% COMPUTE_NAME %>/$PROFILER_COMPUTE_NAME/g" \
-  profiling/profiling_job_tmpl.yml > profiling_job.yml
+  profiling/profiling_job_tmpl.yml > ${ENDPOINT_NAME}_profiling_job.yml
 # </create_profiling_job_yaml_file>
 
 # <create_profiling_job>
-run_id=$(az ml job create -f profiling_job.yml --query name -o tsv)
+run_id=$(az ml job create -f ${ENDPOINT_NAME}_profiling_job.yml --query name -o tsv)
 # </create_profiling_job>
 
 # <check_job_status_in_studio>
