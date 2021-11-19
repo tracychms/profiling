@@ -13,6 +13,7 @@
 # <set_variables>
 export ENDPOINT_NAME="<ENDPOINT_NAME>"
 export DEPLOYMENT_NAME="<DEPLOYMENT_NAME>"
+export DEPLOYMENT_COMPUTER_SIZE="${DEPLOYMENT_COMPUTER_SIZE:-Standard_F2s_v2}" # the computer size for the online-deployment
 export PROFILING_TOOL="<PROFILING_TOOL>" # allowed values: wrk, wrk2 and labench
 export PROFILER_COMPUTE_NAME="<PROFILER_COMPUTE_NAME>"
 export PROFILER_COMPUTE_SIZE="<PROFILER_COMPUTE_SIZE>" # required only when compute does not exist already
@@ -25,13 +26,14 @@ export TIMEOUT="" # for labench only, timeout for each request, default value is
 # </set_variables>
 
 export ENDPOINT_NAME=endpt-`echo $RANDOM`
-export DEPLOYMENT_NAME=blue
+export DEPLOYMENT_NAME=${ENDPOINT_NAME}-dep
 export PROFILING_TOOL=wrk
 export PROFILER_COMPUTE_NAME=profilingTest # the compute name for hosting the profiler
 export PROFILER_COMPUTE_SIZE=Standard_F4s_v2 # the compute size for hosting the profiler
 
 # <create_endpoint>
-echo "Creating Endpoint $ENDPOINT_NAME ..."
+echo "Creating Endpoint $ENDPOINT_NAME of size $DEPLOYMENT_COMPUTER_SIZE..."
+sed -e "s/<% COMPUTER_SIZE %>/$DEPLOYMENT_COMPUTER_SIZE/g" online-endpoint/blue-deployment-tmpl.yml > online-endpoint/blue-deployment.yml
 az ml online-endpoint create --name $ENDPOINT_NAME -f online-endpoint/endpoint.yml
 az ml online-deployment create --name $DEPLOYMENT_NAME --endpoint $ENDPOINT_NAME -f online-endpoint/blue-deployment.yml --all-traffic
 # </create_endpoint>
@@ -71,14 +73,14 @@ else
 fi
 
 # create role assignment for acessing workspace resources
-compute_resource_id=`az ml compute show --name $PROFILER_COMPUTE_NAME --query id -o tsv`
-workspace_resource_id=`echo $compute_resource_id | sed 's/\(.*\)\/computes\/.*/\1/'`
-access_token=`az account get-access-token --query accessToken -o tsv`
-compute_info=`curl https://management.azure.com$compute_resource_id?api-version=2021-03-01-preview -H "Content-Type: application/json" -H "Authorization: Bearer $access_token"`
-if [[ $? -ne 0 ]]; then echo "Failed to get info for compute $PROFILER_COMPUTE_NAME" && exit 1; fi
-identity_object_id=`echo $compute_info | jq '.identity.principalId' | sed "s/\"//g"`
-az role assignment create --role Contributor --assignee-object-id $identity_object_id --scope $workspace_resource_id
-if [[ $? -ne 0 ]]; then echo "Failed to create role assignment for compute $PROFILER_COMPUTE_NAME" && exit 1; fi
+# compute_resource_id=`az ml compute show --name $PROFILER_COMPUTE_NAME --query id -o tsv`
+# workspace_resource_id=`echo $compute_resource_id | sed 's/\(.*\)\/computes\/.*/\1/'`
+# access_token=`az account get-access-token --query accessToken -o tsv`
+# compute_info=`curl https://management.azure.com$compute_resource_id?api-version=2021-03-01-preview -H "Content-Type: application/json" -H "Authorization: Bearer $access_token"`
+# if [[ $? -ne 0 ]]; then echo "Failed to get info for compute $PROFILER_COMPUTE_NAME" && exit 1; fi
+# identity_object_id=`echo $compute_info | jq '.identity.principalId' | sed "s/\"//g"`
+# az role assignment create --role Contributor --assignee-object-id $identity_object_id --scope $workspace_resource_id
+# if [[ $? -ne 0 ]]; then echo "Failed to create role assignment for compute $PROFILER_COMPUTE_NAME" && exit 1; fi
 # </create_compute_cluster_for_hosting_the_profiler>
 
 # <upload_payload_file+_to_default_blob_datastore>

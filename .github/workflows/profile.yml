@@ -4,6 +4,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        deployment_computer_size: ['Standard_F2s_v2', 'Standard_F4s_v2']
     steps:
     - name: check out repo
       uses: actions/checkout@v2
@@ -22,5 +26,7 @@ jobs:
           az account set -s ${{secrets.SUBSCRIPTION_ID}}
     - name: run job
       run: bash -x profiling/how-to-profile-online-endpoint.sh
+      env:
+        DEPLOYMENT_COMPUTER_SIZE: ${{matrix.deployment_computer_size}}
       working-directory: code
     
