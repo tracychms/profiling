@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       SKU_LIST:
-        description: 'Define the list of skus in the format of [Standard_F2s_v2, Standard_F4s_v2]'     
+        description: 'Define the list of skus in the format of ["Standard_F2s_v2", "Standard_F4s_v2"]'     
         required: true
-        default: '[Standard_F2s_v2, Standard_F4s_v2]'
+        default: '["Standard_F2s_v2", "Standard_F4s_v2"]'
 jobs:
   build:
     runs-on: ubuntu-latest
