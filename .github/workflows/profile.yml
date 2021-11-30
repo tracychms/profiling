@@ -1,13 +1,18 @@
 name: profiling-online-endpoints
 on:
   workflow_dispatch:
+    inputs:
+      SKU_LIST:
+        description: 'Define the list of skus in the format of [Standard_F2s_v2, Standard_F4s_v2]'     
+        required: true
+        default: '[Standard_F2s_v2, Standard_F4s_v2]'
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        deployment_computer_size: ['Standard_F2s_v2', 'Standard_F4s_v2']
+        deployment_computer_size: ${{ fromJson(github.event.inputs.SKU_LIST) }}
     steps:
     - name: check out repo
       uses: actions/checkout@v2
