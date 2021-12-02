@@ -16,7 +16,7 @@ jobs:
     steps:
     - name: Check out repo
       uses: actions/checkout@v2
-    - name: azure login
+    - name: Azure login
       uses: azure/login@v1
       with:
         creds: ${{secrets.AZURE_CREDENTIALS}}
@@ -31,7 +31,8 @@ jobs:
         az account set -s ${{secrets.SUBSCRIPTION_ID}}
     - name: Generate unique online-endpoint name and online-deployment name
       run: |
-        echo ENDPOINT_NAME=endpt-`echo $RANDOM` >> $GITHUB_ENV
+        export ENDPOINT_NAME=endpt-`echo $RANDOM`
+        echo ENDPOINT_NAME=$ENDPOINT_NAME >> $GITHUB_ENV
         echo DEPLOYMENT_NAME=$ENDPOINT_NAME-dep >> $GITHUB_ENV 
     - name: Create online-endpoint and online-deployment
       run: bash -x profiling/create-online-endpoint.sh
