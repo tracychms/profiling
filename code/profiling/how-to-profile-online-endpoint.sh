@@ -44,23 +44,23 @@ else
 fi
 
 # create role assignment for acessing workspace resources
-compute_resource_id=`az ml compute show --name $PROFILER_COMPUTE_NAME --query id -o tsv`
-workspace_resource_id=`echo $compute_resource_id | sed 's/\(.*\)\/computes\/.*/\1/'`
-access_token=`az account get-access-token --query accessToken -o tsv`
-compute_info=`curl https://management.azure.com$compute_resource_id?api-version=2021-03-01-preview -H "Content-Type: application/json" -H "Authorization: Bearer $access_token"`
-if [[ $? -ne 0 ]]; then echo "Failed to get info for compute $PROFILER_COMPUTE_NAME" && exit 1; fi
-identity_object_id=`echo $compute_info | jq '.identity.principalId' | sed "s/\"//g"`
-az role assignment create --role Contributor --assignee-object-id $identity_object_id --scope $workspace_resource_id
-if [[ $? -ne 0 ]]; then echo "Failed to create role assignment for compute $PROFILER_COMPUTE_NAME" && exit 1; fi
+# compute_resource_id=`az ml compute show --name $PROFILER_COMPUTE_NAME --query id -o tsv`
+# workspace_resource_id=`echo $compute_resource_id | sed 's/\(.*\)\/computes\/.*/\1/'`
+# access_token=`az account get-access-token --query accessToken -o tsv`
+# compute_info=`curl https://management.azure.com$compute_resource_id?api-version=2021-03-01-preview -H "Content-Type: application/json" -H "Authorization: Bearer $access_token"`
+# if [[ $? -ne 0 ]]; then echo "Failed to get info for compute $PROFILER_COMPUTE_NAME" && exit 1; fi
+# identity_object_id=`echo $compute_info | jq '.identity.principalId' | sed "s/\"//g"`
+# az role assignment create --role Contributor --assignee-object-id $identity_object_id --scope $workspace_resource_id
+# if [[ $? -ne 0 ]]; then echo "Failed to create role assignment for compute $PROFILER_COMPUTE_NAME" && exit 1; fi
 # </create_compute_cluster_for_hosting_the_profiler>
 
-# <upload_payload_file+_to_default_blob_datastore>
+# <upload_payload_file_to_default_blob_datastore>
 default_datastore_info=`az ml datastore show --name workspaceblobstore -o json`
 account_name=`echo $default_datastore_info | jq '.account_name' | sed "s/\"//g"`
 container_name=`echo $default_datastore_info | jq '.container_name' | sed "s/\"//g"`
 connection_string=`az storage account show-connection-string --name $account_name -o tsv`
 az storage blob upload --container-name $container_name/profiling_payloads --name ${ENDPOINT_NAME}_payload.txt --file profiling/payload.txt --connection-string $connection_string
-# </upload_payload_file+_to_default_blob_datastore>
+# </upload_payload_file_to_default_blob_datastore>
 
 # <create_profiling_job_yaml_file>
 # please specify environment variable "IDENTITY_ACCESS_TOKEN" when working with ml compute with no appropriate MSI attached
