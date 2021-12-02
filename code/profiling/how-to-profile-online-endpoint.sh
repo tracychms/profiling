@@ -11,8 +11,8 @@
 ## 7. az configure --defaults group=<RESOURCE_GROUP> workspace=<WORKSPACE_NAME>
 
 # <set_variables>
-export ENDPOINT_NAME="<ENDPOINT_NAME>"
-export DEPLOYMENT_NAME="<DEPLOYMENT_NAME>"
+export ENDPOINT_NAME="${ENDPOINT_NAME}"
+export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}"
 export DEPLOYMENT_COMPUTER_SIZE="${DEPLOYMENT_COMPUTER_SIZE:-Standard_F2s_v2}" # the computer size for the online-deployment
 export PROFILING_TOOL="<PROFILING_TOOL>" # allowed values: wrk, wrk2 and labench
 export PROFILER_COMPUTE_NAME="<PROFILER_COMPUTE_NAME>"
@@ -25,38 +25,9 @@ export CLIENTS="" # for labench only, no. of clients for the profiling tool, def
 export TIMEOUT="" # for labench only, timeout for each request, default value is 10s
 # </set_variables>
 
-export ENDPOINT_NAME=endpt-`echo $RANDOM`
-export DEPLOYMENT_NAME=${ENDPOINT_NAME}-dep
 export PROFILING_TOOL=wrk
 export PROFILER_COMPUTE_NAME=profilingTest # the compute name for hosting the profiler
 export PROFILER_COMPUTE_SIZE=Standard_F4s_v2 # the compute size for hosting the profiler
-
-# <create_endpoint>
-echo "Creating Endpoint $ENDPOINT_NAME of size $DEPLOYMENT_COMPUTER_SIZE..."
-sed -e "s/<% COMPUTER_SIZE %>/$DEPLOYMENT_COMPUTER_SIZE/g" online-endpoint/blue-deployment-tmpl.yml > online-endpoint/${DEPLOYMENT_NAME}.yml
-az ml online-endpoint create --name $ENDPOINT_NAME -f online-endpoint/endpoint.yml
-az ml online-deployment create --name $DEPLOYMENT_NAME --endpoint $ENDPOINT_NAME -f online-endpoint/${DEPLOYMENT_NAME}.yml --all-traffic
-# </create_endpoint>
-
-# <check_endpoint_Status>
-endpoint_status=`az ml online-endpoint show -n $ENDPOINT_NAME --query "provisioning_state" -o tsv`
-echo $endpoint_status
-if [[ $endpoint_status == "Succeeded" ]]; then
-  echo "Endpoint $ENDPOINT_NAME created successfully"
-else 
-  echo "Endpoint $ENDPOINT_NAME creation failed"
-  exit 1
-fi
-
-deploy_status=`az ml online-deployment show --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --query "provisioning_state" -o tsv`
-echo $deploy_status
-if [[ $deploy_status == "Succeeded" ]]; then
-  echo "Deployment $DEPLOYMENT_NAME completed successfully"
-else
-  echo "Deployment $DEPLOYMENT_NAME failed"
-  exit 1
-fi
-# </check_endpoint_Status>
 
 # <create_compute_cluster_for_hosting_the_profiler>
 echo "Creating Compute $PROFILER_COMPUTE_NAME ..."

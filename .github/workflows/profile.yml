@@ -7,31 +7,45 @@ on:
         required: true
         default: '["Standard_F2s_v2", "Standard_F4s_v2"]'
 jobs:
-  build:
+  profiling:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         deployment_computer_size: ${{ fromJson(github.event.inputs.SKU_LIST) }}
     steps:
-    - name: check out repo
+    - name: Check out repo
       uses: actions/checkout@v2
     - name: azure login
       uses: azure/login@v1
       with:
         creds: ${{secrets.AZURE_CREDENTIALS}}
-    - name: install dependencies
+    - name: Install dependencies
       run: |
-          az extension add -n ml -y
-          sudo apt-get update -y && sudo apt-get install jq
-    - name: setup
+        az extension add -n ml -y
+        sudo apt-get update -y && sudo apt-get install jq
+    - name: Setup az environment
       run: |
-          az config set defaults.workspace=${{secrets.AML_WORKSPACE}}
-          az config set defaults.group=${{secrets.RESOURCE_GROUP}}          
-          az account set -s ${{secrets.SUBSCRIPTION_ID}}
-    - name: run job
-      run: bash -x profiling/how-to-profile-online-endpoint.sh
+        az config set defaults.workspace=${{secrets.AML_WORKSPACE}}
+        az config set defaults.group=${{secrets.RESOURCE_GROUP}}          
+        az account set -s ${{secrets.SUBSCRIPTION_ID}}
+    - name: Generate unique online-endpoint name and online-deployment name
+      run: |
+        echo ENDPOINT_NAME=endpt-`echo $RANDOM` >> $GITHUB_ENV
+        echo DEPLOYMENT_NAME=$ENDPOINT_NAME-dep >> $GITHUB_ENV 
+    - name: Create online-endpoint and online-deployment
+      run: bash -x profiling/create-online-endpoint.sh
       env:
+        ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
+        DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
         DEPLOYMENT_COMPUTER_SIZE: ${{matrix.deployment_computer_size}}
       working-directory: code
+    - name: Run profiling job
+      run: bash -x profiling/how-to-profile-online-endpoint.sh
+      env:
+        ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
+        DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
+      working-directory: code
+
+  
     
