@@ -12,3 +12,6 @@ environment:
   image: mcr.microsoft.com/azureml/openmpi3.1.2-ubuntu18.04:20210727.v1
 instance_type: <% COMPUTER_SIZE %>
 instance_count: 1
+request_settings:
+  request_timeout_ms: 3000
+  max_concurrent_requests_per_instance: 4294967295
