@@ -1,7 +1,9 @@
 # <set_variables>
+export SKU_CONNECTION_PAIR=${SKU_CONNECTION_PAIR}
 export ENDPOINT_NAME=${ENDPOINT_NAME}
-export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}"
-export DEPLOYMENT_COMPUTER_SIZE="${DEPLOYMENT_COMPUTER_SIZE:-Standard_F2s_v2}" # the computer size for the online-deployment
+export DEPLOYMENT_NAME=${DEPLOYMENT_NAME}
+export DEPLOYMENT_COMPUTER_SIZE=`echo $SKU_CONNECTION_PAIR | awk -F: '{print $1}'`
+# the computer size for the online-deployment
 # </set_variables>
 
 # <create_endpoint>

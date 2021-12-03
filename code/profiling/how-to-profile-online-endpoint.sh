@@ -13,12 +13,12 @@
 # <set_variables>
 export ENDPOINT_NAME="${ENDPOINT_NAME}"
 export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}"
-export DEPLOYMENT_COMPUTER_SIZE="${DEPLOYMENT_COMPUTER_SIZE:-Standard_F2s_v2}" # the computer size for the online-deployment
+export SKU_CONNECTION_PAIR=${SKU_CONNECTION_PAIR}
 export PROFILING_TOOL="<PROFILING_TOOL>" # allowed values: wrk, wrk2 and labench
 export PROFILER_COMPUTE_NAME="<PROFILER_COMPUTE_NAME>"
 export PROFILER_COMPUTE_SIZE="<PROFILER_COMPUTE_SIZE>" # required only when compute does not exist already
 export DURATION="" # time for running the profiling tool (duration for each wrk call or labench call), default value is 300s
-export CONNECTIONS="${CONNECTIONS:-1}" # for wrk and wrk2 only, no. of connections for the profiling tool, default value is set to be the same as the no. of workers, or 1 if no. of workers is not set
+export CONNECTIONS=`echo $SKU_CONNECTION_PAIR | awk -F: '{print $2}'` # for wrk and wrk2 only, no. of connections for the profiling tool, default value is set to be the same as the no. of workers, or 1 if no. of workers is not set
 export THREAD="" # for wrk and wrk2 only, no. of threads allocated for the profiling tool, default value is 1
 export TARGET_RPS="" # for labench and wrk2 only, target rps for the profiling tool, default value is 50
 export CLIENTS="" # for labench only, no. of clients for the profiling tool, default value is set to be the same as the no. of workers, or 1 if no. of workers is not set

@@ -3,16 +3,16 @@ on:
   workflow_dispatch:
     inputs:
       SKU_LIST:
-        description: 'Define the list of skus in the format of ["Standard_F2s_v2", "Standard_F4s_v2"]'     
+        description: 'Define the list of skus in the format of ["sku:num_concurrent_requests", "sku:num_concurrent_requests"]'     
         required: true
-        default: '["Standard_F2s_v2", "Standard_F4s_v2"]'
+        default: '["Standard_F2s_v2:1", "Standard_F4s_v2:2"]'
 jobs:
   profiling:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        deployment_computer_size: ${{ fromJson(github.event.inputs.SKU_LIST) }}
+        sku_connection_pair: ${{ fromJson(github.event.inputs.SKU_LIST) }}
     steps:
     - name: Check out repo
       uses: actions/checkout@v2
@@ -39,13 +39,14 @@ jobs:
       env:
         ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
         DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
-        DEPLOYMENT_COMPUTER_SIZE: ${{matrix.deployment_computer_size}}
+        SKU_CONNECTION_PAIR: ${{ matrix.sku_connection_pair }}
       working-directory: code
     - name: Run profiling job
       run: bash -x profiling/how-to-profile-online-endpoint.sh
       env:
         ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
         DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
+        SKU_CONNECTION_PAIR: ${{ matrix.sku_connection_pair }}
       working-directory: code
 
   
