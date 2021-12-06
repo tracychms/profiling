@@ -3,7 +3,7 @@ command: >
   profiling.sh -p {inputs.payload}
 experiment_name: profiling-job
 environment:
-  image: docker.io/rachyong/profilers:20211203.1
+  image: docker.io/rachyong/profilers:20211206.27
 environment_variables:
   ONLINE_ENDPOINT: "<% ENDPOINT_NAME %>"
   DEPLOYMENT: "<% DEPLOYMENT_NAME %>"
