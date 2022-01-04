@@ -63,7 +63,7 @@ Now you can start modifying the code in the <a href="/code">`code` folder</a>, s
 
 ### 6. Kickoff auto profile with multiple SKUs
 
-Run the `deploy` GitHub action. It will kick off the model deployment. After it's completed, `profile` action will automatically started.
+Modify the `profile` GitHub action with desired list of SKUs in the format of `["sku:num_concurrent_requests", "sku:num_concurrent_requests"]`. It will auto kick off the model deployment and profiling on the SKU.
 
 # Documentation
 
@@ -77,7 +77,8 @@ Run the `deploy` GitHub action. It will kick off the model deployment. After it'
 | `code/online-endpoint/blue-deployment.yml` | Online deployment YML file to deploy the model. |
 | `code/online-endpoint/endpoint.yml` | Online endpoint YML file to define the endpoint. |
 | `code/online-endpoint/sample-request.json` | Sample request to test the online deployment. |
-| `code/profiling`         | Profiling script to profile the model. |
+| `code/profiling/create-online-endpoint.sh`         | Script to deploy the model to an online endpoint. |
+| `code/profiling/how-to-profile-online-endpoint.sh`         | Script to profile an online endpoint. |
 | `.github/workflows`           | Folder for GitHub workflows. |
 | `docs`                        | Resources for this README.                 |
 | `CODE_OF_CONDUCT.md`          | Microsoft Open Source Code of Conduct.     |
