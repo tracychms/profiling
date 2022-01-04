@@ -1,7 +1,0 @@
-name: deploy
-on: 
-  workflow_dispatch
-
-env:
-
-jobs:
