@@ -11,50 +11,23 @@
 ## 7. az configure --defaults group=<RESOURCE_GROUP> workspace=<WORKSPACE_NAME>
 
 # <set_variables>
-export ENDPOINT_NAME="<ENDPOINT_NAME>"
-export DEPLOYMENT_NAME="<DEPLOYMENT_NAME>"
+export ENDPOINT_NAME="${ENDPOINT_NAME}"
+export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}"
+export SKU_CONNECTION_PAIR=${SKU_CONNECTION_PAIR}
 export PROFILING_TOOL="<PROFILING_TOOL>" # allowed values: wrk, wrk2 and labench
 export PROFILER_COMPUTE_NAME="<PROFILER_COMPUTE_NAME>"
 export PROFILER_COMPUTE_SIZE="<PROFILER_COMPUTE_SIZE>" # required only when compute does not exist already
 export DURATION="" # time for running the profiling tool (duration for each wrk call or labench call), default value is 300s
-export CONNECTIONS="" # for wrk and wrk2 only, no. of connections for the profiling tool, default value is set to be the same as the no. of workers, or 1 if no. of workers is not set
+export CONNECTIONS=`echo $SKU_CONNECTION_PAIR | awk -F: '{print $2}'` # for wrk and wrk2 only, no. of connections for the profiling tool, default value is set to be the same as the no. of workers, or 1 if no. of workers is not set
 export THREAD="" # for wrk and wrk2 only, no. of threads allocated for the profiling tool, default value is 1
 export TARGET_RPS="" # for labench and wrk2 only, target rps for the profiling tool, default value is 50
 export CLIENTS="" # for labench only, no. of clients for the profiling tool, default value is set to be the same as the no. of workers, or 1 if no. of workers is not set
 export TIMEOUT="" # for labench only, timeout for each request, default value is 10s
 # </set_variables>
 
-export ENDPOINT_NAME=endpt-`echo $RANDOM`
-export DEPLOYMENT_NAME=blue
 export PROFILING_TOOL=wrk
 export PROFILER_COMPUTE_NAME=profilingTest # the compute name for hosting the profiler
 export PROFILER_COMPUTE_SIZE=Standard_F4s_v2 # the compute size for hosting the profiler
-
-# <create_endpoint>
-echo "Creating Endpoint $ENDPOINT_NAME ..."
-az ml online-endpoint create --name $ENDPOINT_NAME -f endpoints/online/managed/sample/endpoint.yml
-az ml online-deployment create --name $DEPLOYMENT_NAME --endpoint $ENDPOINT_NAME -f endpoints/online/managed/sample/blue-deployment.yml --all-traffic
-# </create_endpoint>
-
-# <check_endpoint_Status>
-endpoint_status=`az ml online-endpoint show -n $ENDPOINT_NAME --query "provisioning_state" -o tsv`
-echo $endpoint_status
-if [[ $endpoint_status == "Succeeded" ]]; then
-  echo "Endpoint $ENDPOINT_NAME created successfully"
-else 
-  echo "Endpoint $ENDPOINT_NAME creation failed"
-  exit 1
-fi
-
-deploy_status=`az ml online-deployment show --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --query "provisioning_state" -o tsv`
-echo $deploy_status
-if [[ $deploy_status == "Succeeded" ]]; then
-  echo "Deployment $DEPLOYMENT_NAME completed successfully"
-else
-  echo "Deployment $DEPLOYMENT_NAME failed"
-  exit 1
-fi
-# </check_endpoint_Status>
 
 # <create_compute_cluster_for_hosting_the_profiler>
 echo "Creating Compute $PROFILER_COMPUTE_NAME ..."
@@ -81,13 +54,13 @@ az role assignment create --role Contributor --assignee-object-id $identity_obje
 if [[ $? -ne 0 ]]; then echo "Failed to create role assignment for compute $PROFILER_COMPUTE_NAME" && exit 1; fi
 # </create_compute_cluster_for_hosting_the_profiler>
 
-# <upload_payload_file+_to_default_blob_datastore>
+# <upload_payload_file_to_default_blob_datastore>
 default_datastore_info=`az ml datastore show --name workspaceblobstore -o json`
 account_name=`echo $default_datastore_info | jq '.account_name' | sed "s/\"//g"`
 container_name=`echo $default_datastore_info | jq '.container_name' | sed "s/\"//g"`
 connection_string=`az storage account show-connection-string --name $account_name -o tsv`
-az storage blob upload --container-name $container_name/profiling_payloads --name payload.txt --file endpoints/online/profiling/payload.txt --connection-string $connection_string
-# </upload_payload_file+_to_default_blob_datastore>
+az storage blob upload --container-name $container_name/profiling_payloads --name ${ENDPOINT_NAME}_payload.txt --file profiling/payload.txt --connection-string $connection_string
+# </upload_payload_file_to_default_blob_datastore>
 
 # <create_profiling_job_yaml_file>
 # please specify environment variable "IDENTITY_ACCESS_TOKEN" when working with ml compute with no appropriate MSI attached
@@ -102,11 +75,11 @@ sed \
   -e "s/<% TIMEOUT %>/$TIMEOUT/g" \
   -e "s/<% THREAD %>/$THREAD/g" \
   -e "s/<% COMPUTE_NAME %>/$PROFILER_COMPUTE_NAME/g" \
-  endpoints/online/profiling/profiling_job_tmpl.yml > profiling_job.yml
+  profiling/profiling_job_tmpl.yml > ${ENDPOINT_NAME}_profiling_job.yml
 # </create_profiling_job_yaml_file>
 
 # <create_profiling_job>
-run_id=$(az ml job create -f profiling_job.yml --query name -o tsv)
+run_id=$(az ml job create -f ${ENDPOINT_NAME}_profiling_job.yml --query name -o tsv)
 # </create_profiling_job>
 
 # <check_job_status_in_studio>

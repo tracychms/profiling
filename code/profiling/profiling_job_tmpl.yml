@@ -17,4 +17,4 @@ environment_variables:
 compute: "azureml:<% COMPUTE_NAME %>"
 inputs:
   payload:
-    file: azureml://datastores/workspaceblobstore/paths/profiling_payloads/payload.txt
+    file: azureml://datastores/workspaceblobstore/paths/profiling_payloads/<% ENDPOINT_NAME %>_payload.txt

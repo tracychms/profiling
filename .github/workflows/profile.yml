@@ -1,10 +1,53 @@
-name: profile
-on: 
+name: profiling-online-endpoints
+on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["deploy"]
-    types: [completed]
-
-env:
-
+    inputs:
+      SKU_LIST:
+        description: 'Define the list of skus in the format of ["sku:num_concurrent_requests", "sku:num_concurrent_requests"]'     
+        required: true
+        default: '["Standard_F2s_v2:1", "Standard_F4s_v2:2"]'
 jobs:
+  profiling:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sku_connection_pair: ${{ fromJson(github.event.inputs.SKU_LIST) }}
+    steps:
+    - name: Check out repo
+      uses: actions/checkout@v2
+    - name: Azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+    - name: Install dependencies
+      run: |
+        az extension add -n ml -y
+        sudo apt-get update -y && sudo apt-get install jq
+    - name: Setup az environment
+      run: |
+        az config set defaults.workspace=${{secrets.AML_WORKSPACE}}
+        az config set defaults.group=${{secrets.RESOURCE_GROUP}}          
+        az account set -s ${{secrets.SUBSCRIPTION_ID}}
+    - name: Generate unique online-endpoint name and online-deployment name
+      run: |
+        export ENDPOINT_NAME=endpt-`echo $RANDOM`
+        echo ENDPOINT_NAME=$ENDPOINT_NAME >> $GITHUB_ENV
+        echo DEPLOYMENT_NAME=$ENDPOINT_NAME-dep >> $GITHUB_ENV 
+    - name: Create online-endpoint and online-deployment
+      run: bash -x profiling/create-online-endpoint.sh
+      env:
+        ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
+        DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
+        SKU_CONNECTION_PAIR: ${{ matrix.sku_connection_pair }}
+      working-directory: code
+    - name: Run profiling job
+      run: bash -x profiling/how-to-profile-online-endpoint.sh
+      env:
+        ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
+        DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
+        SKU_CONNECTION_PAIR: ${{ matrix.sku_connection_pair }}
+      working-directory: code
+
+  
+    
