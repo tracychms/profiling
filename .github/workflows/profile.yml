@@ -81,7 +81,7 @@ jobs:
         ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
         DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
         SKU_CONNECTION_PAIR: ${{ matrix.sku_connection_pair }}
-        PROFILER_COMPUTE_NAME: ${{needs.create_profiling_compute.outputs.PROFILER_COMPUTE_NAME}}
+        PROFILER_COMPUTE_NAME: ${{ jobs.create_profiler_compute.outputs.PROFILER_COMPUTE_NAME }}
       working-directory: code
 
   
