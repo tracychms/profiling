@@ -26,6 +26,7 @@ jobs:
  
   create_profiling_compute:
     runs-on: ubuntu-latest
+    needs: setup
     outputs:
       PROFILER_COMPUTE_NAME: ${{ steps.set_profiler_compute_info.outputs.PROFILER_COMPUTE_NAME }}
     steps:
@@ -34,7 +35,7 @@ jobs:
       run: |
         echo PROFILER_COMPUTE_NAME=profilingTest >> $GITHUB_ENV
         echo PROFILER_COMPUTE_SIZE=Standard_F4s_v2 >> $GITHUB_ENV
-        Write-Output "::set-output name=PROFILER_COMPUTE_NAME::$PROFILER_COMPUTE_NAME"
+        echo "::set-output name=PROFILER_COMPUTE_NAME::$PROFILER_COMPUTE_NAME"
     - name: Check out repo
       uses: actions/checkout@v2
     - name: Create profiling compute
