@@ -7,15 +7,9 @@ on:
         required: true
         default: '["Standard_F2s_v2:1", "Standard_F4s_v2:2"]'
 jobs:
-  profiling:
+  setup:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        sku_connection_pair: ${{ fromJson(github.event.inputs.SKU_LIST) }}
     steps:
-    - name: Check out repo
-      uses: actions/checkout@v2
     - name: Azure login
       uses: azure/login@v1
       with:
@@ -29,6 +23,37 @@ jobs:
         az config set defaults.workspace=${{secrets.AML_WORKSPACE}}
         az config set defaults.group=${{secrets.RESOURCE_GROUP}}          
         az account set -s ${{secrets.SUBSCRIPTION_ID}}
+ 
+  create_profiling_compute:
+    runs-on: ubuntu-latest
+    outputs:
+      PROFILER_COMPUTE_NAME: ${{ steps.set_profiler_compute_info.outputs.PROFILER_COMPUTE_NAME }}
+    steps:
+    - name: Set profiler compute info
+      id: set_profiler_compute_info
+      run: |
+        echo PROFILER_COMPUTE_NAME=profilingTest >> $GITHUB_ENV
+        echo PROFILER_COMPUTE_SIZE=Standard_F4s_v2 >> $GITHUB_ENV
+        Write-Output "::set-output name=PROFILER_COMPUTE_NAME::$PROFILER_COMPUTE_NAME"
+    - name: Check out repo
+      uses: actions/checkout@v2
+    - name: Create profiling compute
+      run: bash -x profiling/create-profiling-compute.sh
+      env:
+        PROFILER_COMPUTE_NAME: ${{ env.PROFILER_COMPUTE_NAME }}
+        PROFILER_COMPUTE_SIZE: ${{ env.PROFILER_COMPUTE_SIZE }}
+      working-directory: code
+
+  profiling:
+    runs-on: ubuntu-latest
+    needs: create_profiling_compute
+    strategy:
+      fail-fast: false
+      matrix:
+        sku_connection_pair: ${{ fromJson(github.event.inputs.SKU_LIST) }}
+    steps:
+    - name: Check out repo
+      uses: actions/checkout@v2
     - name: Generate unique online-endpoint name and online-deployment name
       run: |
         export ENDPOINT_NAME=endpt-`echo $RANDOM`
@@ -47,6 +72,7 @@ jobs:
         ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
         DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
         SKU_CONNECTION_PAIR: ${{ matrix.sku_connection_pair }}
+        PROFILER_COMPUTE_NAME: ${{needs.create_profiling_compute.outputs.PROFILER_COMPUTE_NAME}}
       working-directory: code
 
   
