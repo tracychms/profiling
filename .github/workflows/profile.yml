@@ -68,20 +68,21 @@ jobs:
         export ENDPOINT_NAME=endpt-`echo $RANDOM`
         echo ENDPOINT_NAME=$ENDPOINT_NAME >> $GITHUB_ENV
         echo DEPLOYMENT_NAME=$ENDPOINT_NAME-dep >> $GITHUB_ENV 
-    - name: Create online-endpoint and online-deployment
-      run: bash -x profiling/create-online-endpoint.sh
-      env:
-        ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
-        DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
-        SKU_CONNECTION_PAIR: ${{ matrix.sku_connection_pair }}
-      working-directory: code
+        echo PROFILER_COMPUTE_NAME=${{ needs.create_profiler_compute.outputs.PROFILER_COMPUTE_NAME }} >> $GITHUB_ENV
+    # - name: Create online-endpoint and online-deployment
+    #   run: bash -x profiling/create-online-endpoint.sh
+    #   env:
+    #     ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
+    #     DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
+    #     SKU_CONNECTION_PAIR: ${{ matrix.sku_connection_pair }}
+    #   working-directory: code
     - name: Run profiling job
       run: bash -x profiling/how-to-profile-online-endpoint.sh
       env:
         ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
         DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
         SKU_CONNECTION_PAIR: ${{ matrix.sku_connection_pair }}
-        PROFILER_COMPUTE_NAME: ${{ needs.create_profiler_compute.outputs.PROFILER_COMPUTE_NAME }}
+        PROFILER_COMPUTE_NAME: ${{ env.PROFILER_COMPUTE_NAME }}
       working-directory: code
 
   
