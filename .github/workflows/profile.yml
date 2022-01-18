@@ -7,7 +7,7 @@ on:
         required: true
         default: '["Standard_F2s_v2:1", "Standard_F4s_v2:2"]'
 jobs:
-  create_profiling_compute:
+  create_profiler_compute:
     runs-on: ubuntu-latest
     outputs:
       PROFILER_COMPUTE_NAME: ${{ steps.set_profiler_compute_info.outputs.PROFILER_COMPUTE_NAME }}
@@ -42,7 +42,7 @@ jobs:
 
   profiling:
     runs-on: ubuntu-latest
-    needs: create_profiling_compute
+    needs: create_profiler_compute
     strategy:
       fail-fast: false
       matrix:
