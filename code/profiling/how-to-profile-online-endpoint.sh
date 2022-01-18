@@ -14,8 +14,8 @@
 export ENDPOINT_NAME="${ENDPOINT_NAME}"
 export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}"
 export SKU_CONNECTION_PAIR=${SKU_CONNECTION_PAIR}
-export PROFILING_TOOL="<PROFILING_TOOL>" # allowed values: wrk, wrk2 and labench
-export PROFILER_COMPUTE_NAME="<PROFILER_COMPUTE_NAME>"
+export PROFILING_TOOL=wrk # allowed values: wrk, wrk2 and labench
+export PROFILER_COMPUTE_NAME="${PROFILER_COMPUTE_NAME}" # the compute name for hosting the profiler
 export DURATION="" # time for running the profiling tool (duration for each wrk call or labench call), default value is 300s
 export CONNECTIONS=`echo $SKU_CONNECTION_PAIR | awk -F: '{print $2}'` # for wrk and wrk2 only, no. of connections for the profiling tool, default value is set to be the same as the no. of workers, or 1 if no. of workers is not set
 export THREAD="" # for wrk and wrk2 only, no. of threads allocated for the profiling tool, default value is 1
@@ -23,9 +23,6 @@ export TARGET_RPS="" # for labench and wrk2 only, target rps for the profiling t
 export CLIENTS="" # for labench only, no. of clients for the profiling tool, default value is set to be the same as the no. of workers, or 1 if no. of workers is not set
 export TIMEOUT="" # for labench only, timeout for each request, default value is 10s
 # </set_variables>
-
-export PROFILING_TOOL=wrk
-export PROFILER_COMPUTE_NAME="${PROFILER_COMPUTE_NAME}" # the compute name for hosting the profiler
 
 # <upload_payload_file_to_default_blob_datastore>
 default_datastore_info=`az ml datastore show --name workspaceblobstore -o json`
