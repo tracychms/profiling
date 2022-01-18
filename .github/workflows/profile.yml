@@ -7,8 +7,10 @@ on:
         required: true
         default: '["Standard_F2s_v2:1", "Standard_F4s_v2:2"]'
 jobs:
-  setup:
+  create_profiling_compute:
     runs-on: ubuntu-latest
+    outputs:
+      PROFILER_COMPUTE_NAME: ${{ steps.set_profiler_compute_info.outputs.PROFILER_COMPUTE_NAME }}
     steps:
     - name: Azure login
       uses: azure/login@v1
@@ -23,13 +25,6 @@ jobs:
         az config set defaults.workspace=${{secrets.AML_WORKSPACE}}
         az config set defaults.group=${{secrets.RESOURCE_GROUP}}          
         az account set -s ${{secrets.SUBSCRIPTION_ID}}
- 
-  create_profiling_compute:
-    runs-on: ubuntu-latest
-    needs: setup
-    outputs:
-      PROFILER_COMPUTE_NAME: ${{ steps.set_profiler_compute_info.outputs.PROFILER_COMPUTE_NAME }}
-    steps:
     - name: Set profiler compute info
       id: set_profiler_compute_info
       run: |
@@ -55,6 +50,19 @@ jobs:
     steps:
     - name: Check out repo
       uses: actions/checkout@v2
+    - name: Azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+    - name: Install dependencies
+      run: |
+        az extension add -n ml -y
+        sudo apt-get update -y && sudo apt-get install jq
+    - name: Setup az environment
+      run: |
+        az config set defaults.workspace=${{secrets.AML_WORKSPACE}}
+        az config set defaults.group=${{secrets.RESOURCE_GROUP}}          
+        az account set -s ${{secrets.SUBSCRIPTION_ID}}
     - name: Generate unique online-endpoint name and online-deployment name
       run: |
         export ENDPOINT_NAME=endpt-`echo $RANDOM`
