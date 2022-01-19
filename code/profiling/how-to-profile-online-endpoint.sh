@@ -14,9 +14,8 @@
 export ENDPOINT_NAME="${ENDPOINT_NAME}"
 export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}"
 export SKU_CONNECTION_PAIR=${SKU_CONNECTION_PAIR}
-export PROFILING_TOOL="<PROFILING_TOOL>" # allowed values: wrk, wrk2 and labench
-export PROFILER_COMPUTE_NAME="<PROFILER_COMPUTE_NAME>"
-export PROFILER_COMPUTE_SIZE="<PROFILER_COMPUTE_SIZE>" # required only when compute does not exist already
+export PROFILING_TOOL=wrk # allowed values: wrk, wrk2 and labench
+export PROFILER_COMPUTE_NAME="${PROFILER_COMPUTE_NAME}" # the compute name for hosting the profiler
 export DURATION="" # time for running the profiling tool (duration for each wrk call or labench call), default value is 300s
 export CONNECTIONS=`echo $SKU_CONNECTION_PAIR | awk -F: '{print $2}'` # for wrk and wrk2 only, no. of connections for the profiling tool, default value is set to be the same as the no. of workers, or 1 if no. of workers is not set
 export THREAD="" # for wrk and wrk2 only, no. of threads allocated for the profiling tool, default value is 1
@@ -24,35 +23,6 @@ export TARGET_RPS="" # for labench and wrk2 only, target rps for the profiling t
 export CLIENTS="" # for labench only, no. of clients for the profiling tool, default value is set to be the same as the no. of workers, or 1 if no. of workers is not set
 export TIMEOUT="" # for labench only, timeout for each request, default value is 10s
 # </set_variables>
-
-export PROFILING_TOOL=wrk
-export PROFILER_COMPUTE_NAME=profilingTest # the compute name for hosting the profiler
-export PROFILER_COMPUTE_SIZE=Standard_F4s_v2 # the compute size for hosting the profiler
-
-# <create_compute_cluster_for_hosting_the_profiler>
-echo "Creating Compute $PROFILER_COMPUTE_NAME ..."
-az ml compute create --name $PROFILER_COMPUTE_NAME --size $PROFILER_COMPUTE_SIZE --identity-type SystemAssigned --type amlcompute
-
-# check compute status
-compute_status=`az ml compute show --name $PROFILER_COMPUTE_NAME --query "provisioning_state" -o tsv`
-echo $compute_status
-if [[ $compute_status == "Succeeded" ]]; then
-  echo "Compute $PROFILER_COMPUTE_NAME created successfully"
-else 
-  echo "Compute $PROFILER_COMPUTE_NAME creation failed"
-  exit 1
-fi
-
-# create role assignment for acessing workspace resources
-compute_resource_id=`az ml compute show --name $PROFILER_COMPUTE_NAME --query id -o tsv`
-workspace_resource_id=`echo $compute_resource_id | sed 's/\(.*\)\/computes\/.*/\1/'`
-access_token=`az account get-access-token --query accessToken -o tsv`
-compute_info=`curl https://management.azure.com$compute_resource_id?api-version=2021-03-01-preview -H "Content-Type: application/json" -H "Authorization: Bearer $access_token"`
-if [[ $? -ne 0 ]]; then echo "Failed to get info for compute $PROFILER_COMPUTE_NAME" && exit 1; fi
-identity_object_id=`echo $compute_info | jq '.identity.principalId' | sed "s/\"//g"`
-az role assignment create --role Contributor --assignee-object-id $identity_object_id --scope $workspace_resource_id
-if [[ $? -ne 0 ]]; then echo "Failed to create role assignment for compute $PROFILER_COMPUTE_NAME" && exit 1; fi
-# </create_compute_cluster_for_hosting_the_profiler>
 
 # <upload_payload_file_to_default_blob_datastore>
 default_datastore_info=`az ml datastore show --name workspaceblobstore -o json`
