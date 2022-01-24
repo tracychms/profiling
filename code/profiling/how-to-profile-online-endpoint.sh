@@ -65,7 +65,3 @@ sleep 10
 az ml job download --name $run_id --download-path report_$run_id
 echo "Job result has been downloaded to dir report_$run_id"
 # </get_job_report>
-
-# <delete_endpoint>
-az ml online-endpoint delete --name $ENDPOINT_NAME -y
-# </delete_endpoint>
