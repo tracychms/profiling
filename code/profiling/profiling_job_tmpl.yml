@@ -18,3 +18,5 @@ compute: "azureml:<% COMPUTE_NAME %>"
 inputs:
   payload:
     file: azureml://datastores/workspaceblobstore/paths/profiling_payloads/<% ENDPOINT_NAME %>_payload.txt
+tags:
+  sku_conn: "<% SKU_CONNECTION_PAIR %>"

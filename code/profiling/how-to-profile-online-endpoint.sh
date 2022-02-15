@@ -45,6 +45,7 @@ sed \
   -e "s/<% TIMEOUT %>/$TIMEOUT/g" \
   -e "s/<% THREAD %>/$THREAD/g" \
   -e "s/<% COMPUTE_NAME %>/$PROFILER_COMPUTE_NAME/g" \
+  -e "s/<% SKU_CONNECTION_PAIR %>/$SKU_CONNECTION_PAIR/g"
   profiling/profiling_job_tmpl.yml > ${ENDPOINT_NAME}_profiling_job.yml
 # </create_profiling_job_yaml_file>
 
