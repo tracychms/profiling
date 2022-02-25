@@ -84,6 +84,11 @@ jobs:
         SKU_CONNECTION_PAIR: ${{ matrix.sku_connection_pair }}
         PROFILER_COMPUTE_NAME: ${{ needs.create_profiler_compute.outputs.PROFILER_COMPUTE_NAME }}
       working-directory: code
+    - name: Delete online-endpoint and online-deployment
+      run: bash -x profiling/delete-online-endpoint.sh
+      env:
+        ENDPOINT_NAME: ${{ env.ENDPOINT_NAME }}
+      working-directory: code
 
   
     
