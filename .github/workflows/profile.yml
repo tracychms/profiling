@@ -5,7 +5,7 @@ on:
       SKU_LIST:
         description: 'Define the list of skus in the format of ["sku:num_concurrent_requests", "sku:num_concurrent_requests"]'     
         required: true
-        default: '["Standard_F2s_v2:1", "Standard_F4s_v2:2"]'
+        default: '["Standard_F4s_v2:2", "Standard_F8s_v2:4"]'
 jobs:
   create_profiler_compute:
     runs-on: ubuntu-latest
