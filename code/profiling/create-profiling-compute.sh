@@ -5,7 +5,7 @@ export PROFILER_COMPUTE_SIZE="${PROFILER_COMPUTE_SIZE}" # the compute size for h
 
 # <create_compute_cluster_for_hosting_the_profiler>
 echo "Creating Compute $PROFILER_COMPUTE_NAME ..."
-az ml compute create --name $PROFILER_COMPUTE_NAME --size $PROFILER_COMPUTE_SIZE --identity-type SystemAssigned --type amlcompute
+az ml compute create --name $PROFILER_COMPUTE_NAME --size $PROFILER_COMPUTE_SIZE --identity-type SystemAssigned --type amlcompute --max-instances 3
 
 # check compute status
 compute_status=`az ml compute show --name $PROFILER_COMPUTE_NAME --query "provisioning_state" -o tsv`
