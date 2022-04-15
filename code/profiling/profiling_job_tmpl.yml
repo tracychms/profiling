@@ -4,7 +4,7 @@ command: >
 experiment_name: profiling-job
 display_name: <% SKU_CONNECTION_PAIR %>
 environment:
-  image: mcr.microsoft.com/azureml/online-endpoints-model-profiler:latest
+  image: rachyong/profilers:20220415.1
 environment_variables:
   ONLINE_ENDPOINT: "<% ENDPOINT_NAME %>"
   DEPLOYMENT: "<% DEPLOYMENT_NAME %>"
