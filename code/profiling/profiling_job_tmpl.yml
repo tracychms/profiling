@@ -1,9 +1,10 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 command: >
-  profiling.sh -p {inputs.payload}
+  python -m online_endpoints_model_profiler --payload_path ${{inputs.payload}}
 experiment_name: profiling-job
+display_name: <% SKU_CONNECTION_PAIR %>
 environment:
-  image: docker.io/rachyong/profilers:latest
+  image: mcr.microsoft.com/azureml/online-endpoints-model-profiler:latest
 environment_variables:
   ONLINE_ENDPOINT: "<% ENDPOINT_NAME %>"
   DEPLOYMENT: "<% DEPLOYMENT_NAME %>"
@@ -17,4 +18,5 @@ environment_variables:
 compute: "azureml:<% COMPUTE_NAME %>"
 inputs:
   payload:
-    file: azureml://datastores/workspaceblobstore/paths/profiling_payloads/payload.txt
+    type: uri_file
+    path: azureml://datastores/workspaceblobstore/paths/profiling_payloads/<% ENDPOINT_NAME %>_payload.txt
