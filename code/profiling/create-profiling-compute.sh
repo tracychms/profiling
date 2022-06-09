@@ -4,6 +4,10 @@ export PROFILER_COMPUTE_SIZE="${PROFILER_COMPUTE_SIZE}" # the compute size for h
 # </set_variables>
 
 # <create_compute_cluster_for_hosting_the_profiler>
+# skip compute creation if compute exists already
+az ml compute show --name $PROFILER_COMPUTE_NAME
+if [[ $? -eq 0 ]]; then echo "compute $PROFILER_COMPUTE_NAME exists already, will skip creation and role assignment." && exit 0; fi
+
 echo "Creating Compute $PROFILER_COMPUTE_NAME ..."
 az ml compute create --name $PROFILER_COMPUTE_NAME --size $PROFILER_COMPUTE_SIZE --identity-type SystemAssigned --type amlcompute --max-instances 3
 
